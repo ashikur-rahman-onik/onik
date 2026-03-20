@@ -18,6 +18,7 @@
   const firebaseConfig = {
     apiKey: "AIzaSyDXfh-7n1kMPy5WviUn0xPlBrv0j0fJkqU",
     authDomain: "onik-portfolio.firebaseapp.com",
+    databaseURL: "https://onik-portfolio-default-rtdb.asia-southeast1.firebasedatabase.app",
     projectId: "onik-portfolio",
     storageBucket: "onik-portfolio.firebasestorage.app",
     messagingSenderId: "537854594801",
@@ -1010,12 +1011,13 @@ async function doWhatsApp(){
   const s=document.getElementById('w-sub').value||'General Inquiry';
   const m=document.getElementById('w-msg').value.trim();
   if(!n||!m){alert('Please enter your name and message.');return;}
+  if(!n||!m){alert('Please enter your name and message.');return;}
   try{
     if(window._portfolioDb){
       const {addDoc,collection,serverTimestamp}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
       await addDoc(collection(window._portfolioDb,'messages'),{name:n,subject:s,message:m,via:'whatsapp',read:false,time:serverTimestamp()});
     }
-  }catch(err){console.warn('Msg save error',err);}
+  }catch(err){console.warn('WA msg save error',err);}
   const txt=`Hello Ashikur,\n\nRe: ${s}\n\n${m}\n\n— From: ${n}`;
   window.open('https://wa.me/8801973321755?text='+encodeURIComponent(txt),'_blank');
 }

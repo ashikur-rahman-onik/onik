@@ -8,6 +8,24 @@
 <meta name="description" content="MD. Ashikur Rahman Onik — Freelancer specializing in Data Entry, Graphic Design, and Document Work. Based in Bagatipara, Natore, Bangladesh."/>
 <meta name="robots" content="index, follow"/>
 <link rel="canonical" href="https://ashikur-rahman-onik.github.io/onik/"/>
+<!-- Open Graph / Facebook -->
+<meta property="og:type"        content="website"/>
+<meta property="og:url"         content="https://ashikur-rahman-onik.github.io/onik/"/>
+<meta property="og:title"       content="MD. Ashikur Rahman Onik — Portfolio"/>
+<meta property="og:description" content="Freelancer specializing in Data Entry, Graphic Design, and Document Work. BTEB Certified. Based in Natore, Bangladesh."/>
+<meta property="og:image"       content="https://ashikur-rahman-onik.github.io/onik/favicon-180.png"/>
+<meta property="og:image:width"  content="1200"/>
+<meta property="og:image:height" content="630"/>
+<meta property="og:locale"      content="en_US"/>
+<meta property="og:site_name"   content="Ashikur Rahman Onik Portfolio"/>
+<!-- Twitter Card -->
+<meta name="twitter:card"        content="summary_large_image"/>
+<meta name="twitter:title"       content="MD. Ashikur Rahman Onik — Portfolio"/>
+<meta name="twitter:description" content="Freelancer specializing in Data Entry, Graphic Design, and Document Work. BTEB Certified."/>
+<meta name="twitter:image"       content="https://ashikur-rahman-onik.github.io/onik/favicon-180.png"/>
+<!-- Extra SEO -->
+<meta name="author"             content="MD. Ashikur Rahman Onik"/>
+<meta name="keywords"           content="Ashikur Rahman Onik, Data Entry, Graphic Design, Freelancer, Bangladesh, BTEB, Computer Operator"/>
 <!-- FAVICON -->
 <link rel="icon" type="image/x-icon" href="https://ashikur-rahman-onik.github.io/onik/favicon.ico"/>
 <link rel="icon" type="image/png" sizes="32x32" href="https://ashikur-rahman-onik.github.io/onik/favicon-32.png"/>
@@ -15,10 +33,12 @@
 <meta name="theme-color" content="#2d2620"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<!-- jsPDF for Resume PDF Generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+  import { getDatabase, ref, onValue, push, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDJfJEDyvpyBs0EGVNBxAsruaOrRQ7Lkmw",
@@ -37,7 +57,7 @@
     const d = snap.val();
     if (!d) return;
 
-    // ── HERO ──
+    // \u2500\u2500 HERO \u2500\u2500
     if (d.hero) {
       const h = d.hero;
       // Logo: image takes priority over text
@@ -54,7 +74,7 @@
       }
       if (h.name) {
         document.querySelectorAll('.d-name').forEach(el => el.textContent = h.name);
-        document.title = h.name + ' — Portfolio';
+        document.title = h.name + ' \u2014 Portfolio';
       }
       if (h.eyebrow)     document.querySelectorAll('.d-eyebrow').forEach(el => el.textContent = h.eyebrow);
       if (h.title)       document.querySelectorAll('.d-title').forEach(el => el.textContent = h.title);
@@ -86,7 +106,7 @@
       if (h.facebook) document.querySelectorAll('.d-facebook').forEach(el => el.href = h.facebook);
     }
 
-    // ── ABOUT ──
+    // \u2500\u2500 ABOUT \u2500\u2500
     if (d.about) {
       if (d.about.para1) { const el = document.getElementById('about-p1'); if (el) el.innerHTML = d.about.para1; }
       if (d.about.para2) { const el = document.getElementById('about-p2'); if (el) el.innerHTML = d.about.para2; }
@@ -113,7 +133,7 @@
       }
     }
 
-    // ── EXPERIENCE ──
+    // \u2500\u2500 EXPERIENCE \u2500\u2500
     if (d.experience && Array.isArray(d.experience)) {
       const c = document.getElementById('exp-container');
       if (c) {
@@ -134,7 +154,7 @@
       }
     }
 
-    // ── SKILLS ──
+    // \u2500\u2500 SKILLS \u2500\u2500
     if (d.skills && Array.isArray(d.skills)) {
       const g = document.getElementById('skills-grid');
       if (g) {
@@ -142,13 +162,20 @@
           <div class="sk-card">
             <span class="sk-num">${String(i+1).padStart(2,'0')}</span>
             <p class="sk-cat">${s.category || ''}</p>
-            <div class="sk-list">${(s.items||[]).map(item=>`<div class="sk-item">${item}</div>`).join('')}</div>
+            <div class="sk-list">${(s.items||[]).map(item=>{
+              const name = typeof item === 'object' ? (item.name||'') : item;
+              const lvl  = typeof item === 'object' ? (item.level||0) : 0;
+              return `<div class="sk-item">
+                <span class="sk-iname">${name}</span>
+                ${lvl ? `<div class="sk-bar-wrap"><div class="sk-bar" style="--pct:${lvl}%"></div></div><span class="sk-pct">${lvl}%</span>` : ''}
+              </div>`;
+            }).join('')}</div>
           </div>`).join('');
         if (window._io) window._io.observe(g);
       }
     }
 
-    // ── EDUCATION ──
+    // \u2500\u2500 EDUCATION \u2500\u2500
     if (d.education && Array.isArray(d.education)) {
       const c = document.getElementById('edu-container');
       if (c) {
@@ -160,7 +187,7 @@
               <p class="e-sch">${e.year || ''}</p>
             </div>
             <div>
-              <p class="e-gpa">${e.gpa || '—'}</p>
+              <p class="e-gpa">${e.gpa || '\u2014'}</p>
               <p class="e-yr">${e.status || ''}</p>
             </div>
           </div>`).join('');
@@ -168,13 +195,13 @@
       }
     }
 
-    // ── CERTIFICATIONS ──
+    // \u2500\u2500 CERTIFICATIONS \u2500\u2500
     if (d.certifications && Array.isArray(d.certifications)) {
       const g = document.getElementById('cert-grid');
       if (g) {
         g.innerHTML = d.certifications.map(c => `
           <div class="cert-card">
-            <span class="c-ico">${c.icon || '🏅'}</span>
+            <span class="c-ico">${c.icon || '\u{1F3C5}'}</span>
             <p class="c-n">${c.name || ''}</p>
             <p class="c-b">${c.issuer || ''}</p>
           </div>`).join('');
@@ -182,6 +209,12 @@
       }
     }
   });
+
+  // \u2500\u2500 EXPOSE Firebase globals so regular scripts can use them \u2500\u2500
+  window._db   = db;
+  window._ref  = ref;
+  window._push = push;
+  window._onValue = onValue;
 </script>
 
 <style>
@@ -247,9 +280,11 @@ nav.solid{padding:1rem 5rem;background:rgba(253,249,243,.95);backdrop-filter:blu
 .n-logo span{color:var(--gold);}
 .n-links{list-style:none;display:flex;gap:2.5rem;}
 .n-links a{font-family:var(--hd);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s;position:relative;}
-.n-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1.5px;background:var(--gold);transition:width .4s var(--ez);}
+.n-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1.5px;background:var(--gold);transition:width .5s var(--ez);}
 .n-links a:hover{color:var(--gold);}
 .n-links a:hover::after{width:100%;}
+.n-links a.active{color:var(--gold);}
+.n-links a.active::after{width:100%;}
 .n-cta{font-family:var(--hd);font-size:.7rem;letter-spacing:.16em;text-transform:uppercase;padding:.65rem 1.8rem;background:var(--gold);color:var(--cream);text-decoration:none;border:none;cursor:pointer;transition:all .4s var(--ez);}
 .n-cta:hover{background:var(--ink);transform:translateY(-2px);}
 
@@ -290,8 +325,11 @@ h1.h-name{font-family:var(--dp);font-size:clamp(3rem,5.5vw,5.8rem);font-weight:9
 .btn-fill:hover::before{transform:scaleX(1);}
 .btn-fill:hover{border-color:var(--gold);}
 .btn-fill span{position:relative;z-index:1;}
-.btn-out{padding:1rem 2.8rem;background:transparent;color:var(--ink);font-family:var(--hd);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;border:1.5px solid var(--border);transition:all .3s;display:inline-block;}
-.btn-out:hover{border-color:var(--ink);}
+.btn-out{padding:1rem 2.8rem;background:transparent;color:var(--ink);font-family:var(--hd);font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;border:1.5px solid var(--border);transition:all .45s var(--ez);display:inline-block;position:relative;overflow:hidden;}
+.btn-out::before{content:'';position:absolute;inset:0;background:var(--ink);transform:scaleY(0);transform-origin:bottom;transition:transform .45s var(--ez);z-index:0;}
+.btn-out:hover::before{transform:scaleY(1);}
+.btn-out:hover{color:var(--cream);border-color:var(--ink);}
+.btn-out>*{position:relative;z-index:1;}
 .h-right{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;padding:7rem 0 5rem;opacity:0;transform:translateX(60px) scale(.95);animation:hR 1.2s var(--ez) .5s forwards;}
 .photo-wrap{position:relative;width:370px;height:460px;}
 .photo-wrap::before{content:'';position:absolute;top:-16px;right:-16px;bottom:16px;left:16px;border:1.5px solid var(--gold);z-index:0;transition:transform .6s var(--ez);}
@@ -370,10 +408,18 @@ h2.s-h em{font-style:italic;color:var(--gold);}
 .sk-cat{font-family:var(--hd);font-size:.85rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);font-weight:700;margin-bottom:1.5rem;transition:color .4s;}
 .sk-card:hover .sk-cat{color:var(--goldf);}
 .sk-list{display:flex;flex-direction:column;gap:.5rem;}
-.sk-item{font-size:.82rem;color:var(--muted);padding:.45rem 0;border-bottom:1px solid var(--sand);display:flex;align-items:center;gap:.75rem;transition:color .3s,border-color .3s;}
+.sk-item{font-size:.82rem;color:var(--muted);padding:.5rem 0;border-bottom:1px solid var(--sand);display:flex;align-items:center;gap:.6rem;transition:color .3s,border-color .3s;flex-wrap:wrap;}
 .sk-item::before{content:'';width:3px;height:3px;border-radius:50%;background:var(--sand);flex-shrink:0;transition:background .3s;}
 .sk-card:hover .sk-item{color:rgba(255,255,255,.6);border-color:rgba(255,255,255,.08);}
 .sk-card:hover .sk-item::before{background:var(--goldf);}
+.sk-iname{flex:1;min-width:60px;}
+.sk-bar-wrap{flex:1;height:3px;background:rgba(255,255,255,.08);border-radius:2px;overflow:hidden;min-width:40px;max-width:80px;}
+.sk-card:not(:hover) .sk-bar-wrap{background:var(--sand);}
+.sk-bar{height:100%;width:0;border-radius:2px;background:var(--gold);transition:width 1.2s cubic-bezier(.19,1,.22,1);transform-origin:left;}
+.sk-card.bar-animate .sk-bar{width:var(--pct);}
+.sk-card:hover .sk-bar{background:var(--goldf);}
+.sk-pct{font-family:var(--hd);font-size:.55rem;letter-spacing:.08em;color:var(--muted);min-width:28px;text-align:right;transition:color .3s;}
+.sk-card:hover .sk-pct{color:rgba(255,255,255,.5);}
 
 /* ── EDUCATION ── */
 #education{background:var(--cream);}
@@ -462,6 +508,24 @@ footer{background:var(--ink);color:#4a4040;padding:2.5rem 5rem;display:flex;alig
 .f-links{display:flex;gap:2rem;}
 .f-links a{color:#4a4040;text-decoration:none;transition:color .3s;}
 .f-links a:hover{color:var(--goldf);}
+
+/* ── RESUME DOWNLOAD BUTTON ── */
+.btn-resume{display:inline-flex;align-items:center;gap:.7rem;font-family:var(--hd);font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;padding:.7rem 1.8rem;background:transparent;color:var(--muted);border:1.5px solid var(--border);cursor:pointer;transition:all .4s var(--ez);position:relative;overflow:hidden;}
+.btn-resume::before{content:'';position:absolute;inset:0;background:var(--ink);transform:scaleX(0);transform-origin:left;transition:transform .5s var(--ez);z-index:0;}
+.btn-resume:hover::before{transform:scaleX(1);}
+.btn-resume:hover{color:var(--cream);border-color:var(--ink);}
+.btn-resume span,.btn-resume svg{position:relative;z-index:1;}
+.btn-resume svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;transition:transform .3s;}
+.btn-resume:hover svg{transform:translateY(2px);}
+.btn-resume.loading{opacity:.6;pointer-events:none;}
+
+/* ── NOTIFICATION TOASTS ── */
+.pdf-toast{position:fixed;bottom:2rem;right:2rem;z-index:99999;padding:.85rem 1.6rem;background:var(--ink2);color:var(--cream);font-family:var(--hd);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;border-left:3px solid var(--gold);opacity:0;transform:translateY(16px);transition:all .35s var(--ez);pointer-events:none;}
+.pdf-toast.show{opacity:1;transform:none;}
+.msg-toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);z-index:99999;padding:.85rem 2rem;background:var(--ink2);color:var(--cream);font-family:var(--hd);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;border-left:3px solid var(--gold);opacity:0;transition:all .35s var(--ez);pointer-events:none;white-space:nowrap;}
+.msg-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.msg-toast.err{border-left-color:#e05050;}
+.msg-toast.warn{border-left-color:#e0a84e;}
 
 /* ── SCROLL REVEAL ── */
 .rv{opacity:0;transform:translateY(40px);transition:opacity .9s var(--ez),transform .9s var(--ez);}
@@ -556,6 +620,10 @@ footer{background:var(--ink);color:#4a4040;padding:2.5rem 5rem;display:flex;alig
     <li><a href="#contact">Contact</a></li>
   </ul>
   <a href="#contact" class="n-cta">Hire Me</a>
+  <button class="btn-resume" onclick="downloadResume(this)" style="margin-left:.5rem" title="Download CV">
+    <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    <span>CV</span>
+  </button>
   <button class="n-ham" id="hamburger" onclick="toggleDrawer()" aria-label="Menu">
     <span></span><span></span><span></span>
   </button>
@@ -577,6 +645,10 @@ footer{background:var(--ink);color:#4a4040;padding:2.5rem 5rem;display:flex;alig
     <div class="h-ctas">
       <a href="#contact" class="btn-fill d-btn1"><span>Get In Touch →</span></a>
       <a href="#experience" class="btn-out d-btn2">View My Work</a>
+      <button class="btn-resume" onclick="downloadResume(this)" title="Download ATS-Friendly Resume PDF">
+        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        <span>Download CV</span>
+      </button>
     </div>
   </div>
   <div class="h-right">
@@ -614,7 +686,7 @@ footer{background:var(--ink);color:#4a4040;padding:2.5rem 5rem;display:flex;alig
     <div class="rvr">
       <div class="info-block" id="about-info">
         <div class="i-row"><span class="i-k">Full Name</span><span class="i-v d-name">MD. Ashikur Rahman Onik</span></div>
-        <div class="i-row"><span class="i-k">Email</span><span class="i-v"><a class="d-email-text d-email-link" href="mailto:anikashikur51@gmail.com" style="color:inherit;text-decoration:none">anikashikur51@gmail.com</a></span></div>
+        <div class="i-row"><span class="i-k">Email</span><span class="i-v"><a class="d-email-text d-email-link" href="/cdn-cgi/l/email-protection#e786898e8c86948f8e8c9295d2d6a7808a868e8bc984888a" style="color:inherit;text-decoration:none"><span class="__cf_email__" data-cfemail="e0818e898b819388898b9592d5d1a0878d81898cce838f8d">[email&#160;protected]</span></a></span></div>
         <div class="i-row"><span class="i-k">WhatsApp</span><span class="i-v d-wa-text">+880 1973 321755</span></div>
         <div class="i-row"><span class="i-k">Location</span><span class="i-v d-location">Bagatipara, Natore, Bangladesh</span></div>
         <div class="i-row"><span class="i-k">Status</span><span class="i-v">Available for Work ✅</span></div>
@@ -723,9 +795,9 @@ footer{background:var(--ink);color:#4a4040;padding:2.5rem 5rem;display:flex;alig
             <div class="m-body"><p class="m-lbl">WhatsApp — Fastest Response</p><p class="m-val d-wa-text">+880 1973 321755 · Click to chat now</p></div>
             <div class="m-arr">→</div>
           </a>
-          <a href="mailto:anikashikur51@gmail.com" class="method d-email-link">
+          <a href="/cdn-cgi/l/email-protection#5d3c3334363c2e353436282f686c1d3a303c3431733e3230" class="method d-email-link">
             <div class="m-ico">✉</div>
-            <div class="m-body"><p class="m-lbl">Email Address</p><p class="m-val d-email-text">anikashikur51@gmail.com</p></div>
+            <div class="m-body"><p class="m-lbl">Email Address</p><p class="m-val d-email-text"><span class="__cf_email__" data-cfemail="94f5fafdfff5e7fcfdffe1e6a1a5d4f3f9f5fdf8baf7fbf9">[email&#160;protected]</span></p></div>
             <div class="m-arr">→</div>
           </a>
           <a href="https://linkedin.com/in/anikashikur51" target="_blank" class="method d-linkedin">
@@ -767,7 +839,7 @@ footer{background:var(--ink);color:#4a4040;padding:2.5rem 5rem;display:flex;alig
               </select>
             </div>
             <div class="ff"><textarea id="e-msg" placeholder="Write your message here..."></textarea></div>
-            <div class="f-note">✅ Opens in <strong>Gmail / Outlook</strong> pre-filled, ready to send to <strong>anikashikur51@gmail.com</strong></div>
+            <div class="f-note">✅ Opens in <strong>Gmail / Outlook</strong> pre-filled, ready to send to <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="35545b5c5e54465d5c5e40470004755258545c591b565a58">[email&#160;protected]</a></strong></div>
             <button class="btn-send" onclick="doEmail()">Send via Email →</button>
           </div>
           <div class="fpanel" id="fp-wa">
@@ -796,6 +868,10 @@ footer{background:var(--ink);color:#4a4040;padding:2.5rem 5rem;display:flex;alig
   <div class="ct-bg">CONTACT</div>
 </section>
 
+<!-- TOASTS -->
+<div class="pdf-toast" id="pdfToast"></div>
+<div class="msg-toast" id="msgToast"></div>
+
 <!-- FOOTER -->
 <footer>
   <span class="f-logo d-logo-text">A<span>.</span>Onik</span>
@@ -807,7 +883,7 @@ footer{background:var(--ink);color:#4a4040;padding:2.5rem 5rem;display:flex;alig
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 'use strict';
 
 /* AUTO YEAR */
@@ -873,11 +949,46 @@ document.getElementById('navDrawer').addEventListener('click', function(e) {
   if (e.target === this) closeDrawer();
 });
 
-/* SCROLL REVEAL */
+/* SCROLL REVEAL + PROGRESS BAR ANIMATION */
 window._io = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); window._io.unobserve(e.target); } });
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('on');
+      // Trigger progress bars inside sk-cards
+      if (e.target.classList.contains('stg')) {
+        setTimeout(() => {
+          e.target.querySelectorAll('.sk-card').forEach(card => card.classList.add('bar-animate'));
+        }, 200);
+      }
+      window._io.unobserve(e.target);
+    }
+  });
 }, {threshold:0.1, rootMargin:'0px 0px -50px 0px'});
 document.querySelectorAll('.rv,.rvl,.rvr,.stg').forEach(el => window._io.observe(el));
+
+/* NAV ACTIVE LINK on scroll */
+const _sections = ['hero','about','experience','skills','education','certifications','contact'];
+const _navLinks = document.querySelectorAll('.n-links a');
+window.addEventListener('scroll', () => {
+  let current = 'hero';
+  _sections.forEach(id => {
+    const sec = document.getElementById(id);
+    if (sec && window.scrollY >= sec.offsetTop - 120) current = id;
+  });
+  _navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}, {passive: true});
+
+/* MSG TOAST */
+function showMsgToast(msg, type='ok', duration=3500) {
+  const t = document.getElementById('msgToast');
+  if (!t) return;
+  t.textContent = msg;
+  t.className = 'msg-toast show' + (type !== 'ok' ? ' ' + type : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), duration);
+}
 
 /* CONTACT TABS */
 function switchTab(type, btn) {
@@ -887,30 +998,363 @@ function switchTab(type, btn) {
   document.getElementById('fp-wa').classList.toggle('on', type==='wa');
 }
 
-/* EMAIL FORM */
-function doEmail() {
+/* EMAIL FORM \u2014 saves to Firebase + opens email app as backup */
+async function doEmail() {
   const n = document.getElementById('e-name').value.trim();
   const e = document.getElementById('e-email').value.trim();
   const s = document.getElementById('e-sub').value || 'Portfolio Inquiry';
   const m = document.getElementById('e-msg').value.trim();
-  if (!n || !m) { alert('Please enter your name and message.'); return; }
+  if (!n || !m) { showMsgToast('\u2757 Name and message required.', 'err'); return; }
+
+  const btn = document.querySelector('#fp-email .btn-send');
+  const origTxt = btn ? btn.textContent : '';
+  if (btn) { btn.textContent = 'Sending\u2026'; btn.disabled = true; }
+
+  try {
+    // 1. Save to Firebase
+    const msgRef = window._ref(window._db, 'messages');
+    await window._push(msgRef, {
+      name: n,
+      email: e || '',
+      subject: s,
+      message: m,
+      channel: 'email',
+      timestamp: new Date().toISOString(),
+      read: false
+    });
+    showMsgToast('\u2705 Message sent! Opening your email app\u2026');
+    // Clear form
+    ['e-name','e-email','e-msg'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('e-sub').selectedIndex = 0;
+  } catch(err) {
+    showMsgToast('\u26A0 Saved locally. Opening email app\u2026', 'warn');
+    console.warn('Firebase msg save failed:', err);
+  }
+
+  // 2. Also open email app as before
   const body = `Hello Ashikur,\n\n${m}\n\n---\nFrom: ${n}\nEmail: ${e||'Not provided'}`;
   const emailEl = document.querySelector('.d-email-text');
   const to = (emailEl && emailEl.textContent.includes('@')) ? emailEl.textContent.trim() : 'anikashikur51@gmail.com';
-  window.location.href = `mailto:${to}?subject=${encodeURIComponent(s+' — From '+n)}&body=${encodeURIComponent(body)}`;
+  setTimeout(() => {
+    window.location.href = `mailto:${to}?subject=${encodeURIComponent(s+' \u2014 From '+n)}&body=${encodeURIComponent(body)}`;
+    if (btn) { btn.textContent = origTxt; btn.disabled = false; }
+  }, 800);
 }
 
-/* WHATSAPP FORM */
-function doWhatsApp() {
+/* WHATSAPP FORM \u2014 saves to Firebase + opens WhatsApp */
+async function doWhatsApp() {
   const n = document.getElementById('w-name').value.trim();
   const s = document.getElementById('w-sub').value || 'General Inquiry';
   const m = document.getElementById('w-msg').value.trim();
-  if (!n || !m) { alert('Please enter your name and message.'); return; }
-  const waEl = document.querySelector('.d-wa-link');
-  const phone = waEl ? waEl.href.replace('https://wa.me/','') : '8801973321755';
-  const text = 'Hello Ashikur,\n\nI am ' + n + '.\nTopic: ' + s + '\n\n' + m;
-  window.open('https://wa.me/' + phone + '?text=' + encodeURIComponent(text), '_blank');
+  if (!n || !m) { showMsgToast('\u2757 Name and message required.', 'err'); return; }
+
+  const btn = document.querySelector('#fp-wa .btn-wa');
+  if (btn) { btn.style.opacity = '.6'; btn.disabled = true; }
+
+  try {
+    await window._push(window._ref(window._db, 'messages'), {
+      name: n, email: '', subject: s, message: m,
+      channel: 'whatsapp', timestamp: new Date().toISOString(), read: false
+    });
+    showMsgToast('\u2705 Message saved! Opening WhatsApp\u2026');
+    ['w-name','w-msg'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+    document.getElementById('w-sub').selectedIndex = 0;
+  } catch(err) {
+    console.warn('Firebase msg save failed:', err);
+  }
+
+  setTimeout(() => {
+    const text = `Hello Ashikur! I'm ${n}.\n\nTopic: ${s}\n\n${m}`;
+    window.open('https://wa.me/8801973321755?text=' + encodeURIComponent(text), '_blank');
+    if (btn) { btn.style.opacity = '1'; btn.disabled = false; }
+  }, 600);
 }
+
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+   ATS-FRIENDLY RESUME PDF GENERATOR
+   Reads live Firebase data from the DOM
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
+function showPdfToast(msg, duration=3000) {
+  const t = document.getElementById('pdfToast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function getTextOf(selector, fallback='') {
+  const el = document.querySelector(selector);
+  return el ? el.textContent.trim() : fallback;
+}
+
+function downloadResume(btn) {
+  if (typeof window.jspdf === 'undefined') {
+    showPdfToast('\u26A0 PDF library not loaded yet. Try again.');
+    return;
+  }
+
+  // Mark button as loading
+  if (btn) btn.classList.add('loading');
+  showPdfToast('\u23F3 Generating your CV...', 8000);
+
+  setTimeout(() => {
+    try {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+      const W = 210, H = 297;
+      const ML = 20, MR = 20, MT = 20;
+      let y = MT;
+      const TW = W - ML - MR; // text width = 170mm
+
+      // \u2500\u2500 COLOUR PALETTE \u2500\u2500
+      const BLACK  = [15, 12, 10];
+      const DARK   = [40, 35, 30];
+      const GOLD   = [150, 100, 40];
+      const GREY   = [100, 95, 88];
+      const LGREY  = [200, 195, 188];
+
+      // \u2500\u2500 HELPERS \u2500\u2500
+      function setFont(style='normal', size=10, color=BLACK) {
+        doc.setFont('helvetica', style);
+        doc.setFontSize(size);
+        doc.setTextColor(...color);
+      }
+      function line(x1, x2, yy, color=LGREY, width=0.3) {
+        doc.setDrawColor(...color);
+        doc.setLineWidth(width);
+        doc.line(x1, yy, x2, yy);
+      }
+      function checkPage(need=12) {
+        if (y + need > H - 15) {
+          doc.addPage();
+          y = MT;
+          return true;
+        }
+        return false;
+      }
+      function sectionHeading(title) {
+        checkPage(16);
+        y += 5;
+        setFont('bold', 8.5, GOLD);
+        doc.setCharSpace(1.5);
+        doc.text(title.toUpperCase(), ML, y);
+        doc.setCharSpace(0);
+        y += 2;
+        line(ML, W - MR, y, GOLD, 0.5);
+        y += 5;
+      }
+      function wrapText(text, x, maxW, lineH) {
+        const lines = doc.splitTextToSize(text, maxW);
+        lines.forEach(l => {
+          checkPage(lineH + 2);
+          doc.text(l, x, y);
+          y += lineH;
+        });
+      }
+
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      //  HEADER \u2014 Name & Title
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      const name  = getTextOf('.d-name', 'MD. Ashikur Rahman Onik');
+      const title = getTextOf('.d-title', 'Computer Operator & Instructor');
+      const email = getTextOf('.d-email-text', 'anikashikur51@gmail.com');
+      const phone = getTextOf('.d-wa-text', '+880 1973 321755');
+      const loc   = getTextOf('.d-location', 'Bagatipara, Natore, Bangladesh');
+
+      // Name
+      setFont('bold', 22, BLACK);
+      doc.text(name, ML, y);
+      y += 7;
+
+      // Title
+      setFont('normal', 10.5, GOLD);
+      doc.text(title, ML, y);
+      y += 5;
+
+      // Contact line
+      line(ML, W - MR, y, LGREY, 0.4);
+      y += 4;
+      setFont('normal', 8, GREY);
+      const contactStr = [
+        email ? '\u2709 ' + email : '',
+        phone ? '\u2706 ' + phone : '',
+        loc   ? '\u2316 ' + loc   : '',
+        'in  linkedin.com/in/anikashikur51'
+      ].filter(Boolean).join('   |   ');
+      doc.text(contactStr, ML, y, { maxWidth: TW });
+      y += 4;
+      line(ML, W - MR, y, LGREY, 0.4);
+      y += 8;
+
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      //  ABOUT / SUMMARY
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      const p1 = getTextOf('#about-p1', '');
+      const p2 = getTextOf('#about-p2', '');
+      const summary = (p1 + ' ' + p2).trim();
+      if (summary) {
+        sectionHeading('Professional Summary');
+        setFont('normal', 9, DARK);
+        wrapText(summary, ML, TW, 5);
+        y += 2;
+      }
+
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      //  EXPERIENCE
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      const expItems = document.querySelectorAll('.exp-item');
+      if (expItems.length > 0) {
+        sectionHeading('Work Experience');
+        expItems.forEach(item => {
+          checkPage(20);
+          const role  = item.querySelector('.e-role')  ? item.querySelector('.e-role').textContent.trim()  : '';
+          const org   = item.querySelector('.e-org')   ? item.querySelector('.e-org').textContent.trim()   : '';
+          const dt    = item.querySelector('.e-dt')    ? item.querySelector('.e-dt').textContent.replace(/\n/g,' ').trim() : '';
+          const place = item.querySelector('.e-pl')    ? item.querySelector('.e-pl').textContent.trim()    : '';
+          const pts   = [...(item.querySelectorAll('.e-pts li') || [])].map(li => li.textContent.trim());
+
+          // Role + date on same line
+          setFont('bold', 10, BLACK);
+          doc.text(role, ML, y);
+          setFont('normal', 8, GREY);
+          const dtStr = dt + (place ? ' \u00B7 ' + place : '');
+          const dtW = doc.getTextWidth(dtStr);
+          doc.text(dtStr, W - MR - dtW, y);
+          y += 4.5;
+
+          // Organisation
+          setFont('normal', 8.5, GOLD);
+          doc.text(org, ML, y);
+          y += 5;
+
+          // Bullet points
+          setFont('normal', 8.5, DARK);
+          pts.forEach(pt => {
+            checkPage(8);
+            doc.text('\u2022', ML, y);
+            wrapText(pt, ML + 5, TW - 5, 4.8);
+          });
+          y += 3;
+        });
+      }
+
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      //  SKILLS
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      const skCards = document.querySelectorAll('.sk-card');
+      if (skCards.length > 0) {
+        sectionHeading('Skills');
+        setFont('normal', 9, DARK);
+        skCards.forEach(card => {
+          checkPage(10);
+          const cat   = card.querySelector('.sk-cat')  ? card.querySelector('.sk-cat').textContent.trim()  : '';
+          const items = [...(card.querySelectorAll('.sk-item') || [])].map(i => {
+            const nameEl = i.querySelector('.sk-iname');
+            return nameEl ? nameEl.textContent.trim() : i.textContent.replace(/\d+%/g,'').trim();
+          });
+          if (!cat) return;
+          const rowText = items.join(' \u2022 ');
+          setFont('bold', 8.5, BLACK);
+          doc.text(cat + ': ', ML, y);
+          const labelW = doc.getTextWidth(cat + ': ');
+          setFont('normal', 8.5, DARK);
+          const wrapped = doc.splitTextToSize(rowText, TW - labelW);
+          doc.text(wrapped[0] || '', ML + labelW, y);
+          y += 4.8;
+          if (wrapped.length > 1) {
+            wrapped.slice(1).forEach(line2 => {
+              checkPage(6);
+              doc.text(line2, ML + labelW, y);
+              y += 4.8;
+            });
+          }
+        });
+        y += 2;
+      }
+
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      //  EDUCATION
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      const eduRows = document.querySelectorAll('.edu-row');
+      if (eduRows.length > 0) {
+        sectionHeading('Education');
+        eduRows.forEach(row => {
+          checkPage(14);
+          const deg  = row.querySelector('.e-deg') ? row.querySelector('.e-deg').textContent.trim() : '';
+          const sub  = row.querySelector('.e-sub') ? row.querySelector('.e-sub').textContent.trim() : '';
+          const sch  = row.querySelector('.e-sch') ? row.querySelector('.e-sch').textContent.trim() : '';
+          const gpa  = row.querySelector('.e-gpa') ? row.querySelector('.e-gpa').textContent.trim().replace('\u2B50','').trim() : '';
+          const yr   = row.querySelector('.e-yr')  ? row.querySelector('.e-yr').textContent.trim()  : '';
+
+          setFont('bold', 9.5, BLACK);
+          doc.text(deg, ML, y);
+          if (gpa && gpa !== '\u2014') {
+            setFont('bold', 9.5, GOLD);
+            const gpaStr = 'GPA: ' + gpa;
+            doc.text(gpaStr, W - MR - doc.getTextWidth(gpaStr), y);
+          }
+          y += 4.5;
+
+          setFont('normal', 8.5, GREY);
+          doc.text(sub + (sch ? '  |  ' + sch : ''), ML, y);
+          if (yr) {
+            doc.text(yr, W - MR - doc.getTextWidth(yr), y);
+          }
+          y += 6;
+        });
+      }
+
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      //  CERTIFICATIONS
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      const certs = document.querySelectorAll('.cert-card');
+      if (certs.length > 0) {
+        sectionHeading('Certifications & Courses');
+        setFont('normal', 8.5, DARK);
+        certs.forEach(card => {
+          checkPage(8);
+          const name2 = card.querySelector('.c-n') ? card.querySelector('.c-n').textContent.trim() : '';
+          const issuer= card.querySelector('.c-b') ? card.querySelector('.c-b').textContent.trim() : '';
+          doc.text('\u2022', ML, y);
+          setFont('bold', 8.5, BLACK);
+          doc.text(name2, ML + 5, y);
+          if (issuer) {
+            setFont('normal', 8, GREY);
+            doc.text(' \u2014 ' + issuer, ML + 5 + doc.getTextWidth(name2), y);
+          }
+          setFont('normal', 8.5, DARK);
+          y += 5;
+        });
+      }
+
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      //  FOOTER LINE
+      // \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+      const totalPages = doc.internal.getNumberOfPages();
+      for (let p = 1; p <= totalPages; p++) {
+        doc.setPage(p);
+        line(ML, W - MR, H - 12, LGREY, 0.3);
+        setFont('normal', 7, GREY);
+        doc.text(name + ' \u2014 Resume', ML, H - 8);
+        doc.text('Page ' + p + ' of ' + totalPages, W - MR, H - 8, { align: 'right' });
+      }
+
+      // \u2500\u2500 SAVE \u2500\u2500
+      const filename = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-resume.pdf';
+      doc.save(filename);
+
+      if (btn) btn.classList.remove('loading');
+      showPdfToast('\u2705 CV downloaded successfully!');
+
+    } catch(err) {
+      console.error('PDF error:', err);
+      if (btn) btn.classList.remove('loading');
+      showPdfToast('\u274C Error generating PDF. Check console.');
+    }
+  }, 50);
+}
+
 </script>
 </body>
-</html>mentById('w-sub')
+</html>

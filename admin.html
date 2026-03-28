@@ -101,7 +101,31 @@ button{font-family:Syne,sans-serif;cursor:pointer;border:none;transition:all .25
 #lbar{position:fixed;top:0;left:0;height:2px;background:var(--gold);z-index:99999;width:0;transition:width .4s;}
 @media(max-width:700px){.sb{width:175px;min-width:175px;}.g2,.g3,.rf{grid-template-columns:1fr;}.qg{grid-template-columns:repeat(2,1fr);}.main{padding:1rem;}}
 @media(max-width:520px){.sb{display:none;}.main{padding:.85rem;}}
+
+/* ── MESSAGES INBOX ── */
+.no-msgs{text-align:center;padding:3rem;color:var(--muted);font-size:.78rem;}
+.msg-card{background:var(--s1);border:1px solid var(--br);margin-bottom:.55rem;padding:1rem 1.1rem;transition:all .25s;border-radius:0;}
+.msg-card.unread{border-left:3px solid var(--gold);background:rgba(192,139,58,.04);}
+.msg-card:hover{border-color:var(--gold);}
+.msg-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem;flex-wrap:wrap;}
+.msg-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;box-shadow:0 0 6px var(--gold);}
+.msg-name{font-family:Syne,sans-serif;font-size:.75rem;font-weight:700;color:var(--text);flex:1;min-width:80px;}
+.msg-ch{font-size:.58rem;color:var(--muted);background:var(--s2);padding:.15rem .5rem;border:1px solid var(--br);}
+.msg-dt{font-size:.58rem;color:var(--muted);margin-left:auto;}
+.msg-acts{display:flex;gap:.3rem;align-items:center;}
+.msg-btn{padding:.22rem .55rem;font-size:.55rem;letter-spacing:.08em;text-transform:uppercase;border:1px solid var(--br);background:transparent;cursor:pointer;font-family:Syne,sans-serif;transition:all .2s;}
+.read-btn{color:var(--green);border-color:rgba(80,200,120,.3);}
+.read-btn:hover{background:var(--green);color:#0a1a0a;}
+.del-btn{color:var(--red);border-color:rgba(224,80,80,.3);}
+.del-btn:hover{background:var(--red);color:#fff;}
+.msg-sub{font-family:Syne,sans-serif;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:.45rem;}
+.msg-body{font-size:.78rem;color:var(--muted);line-height:1.75;white-space:pre-wrap;}
+.msg-email{font-size:.68rem;color:var(--muted);margin-top:.5rem;}
+.msg-email a{color:var(--goldf);text-decoration:none;}
+.msg-email a:hover{text-decoration:underline;}
 </style>
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 <div id="lbar"></div>
@@ -138,6 +162,9 @@ button{font-family:Syne,sans-serif;cursor:pointer;border:none;transition:all .25
       <div class="ni" onclick="showP('skills',this)">&#9889; Skills</div>
       <div class="ni" onclick="showP('edu',this)">&#127891; Education</div>
       <div class="ni" onclick="showP('cert',this)">&#127885; Certifications</div>
+      <div class="ni" onclick="showP('msgs',this)" id="nav-msgs">&#128138; Messages <span id="unread-badge" style="display:none;background:#e05050;color:#fff;font-size:.5rem;padding:.1rem .4rem;border-radius:8px;margin-left:.3rem">0</span></div>
+      <div class="ngl">Tools</div>
+      <div class="ni" onclick="showP('cv',this)">&#128196; CV Generator</div>
     </nav>
     <div class="sbf"><button class="lob" onclick="doLogout()">&#8617; Logout</button></div>
   </div>
@@ -251,6 +278,75 @@ button{font-family:Syne,sans-serif;cursor:pointer;border:none;transition:all .25
       <div id="cert-box"></div>
       <button class="addbtn" id="add-cert">+ Notun Certificate jog koro</button>
       <br><button class="savebtn" onclick="saveCert()">&#128190; Save Certifications</button>
+    <div class="panel" id="p-msgs">
+      <div class="ph">
+        <h2>&#128138; Messages / Inbox</h2>
+        <p>Portfolio contact form theke ashা sobai-er message ekhane dekhbe.</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:1rem;">
+        <button class="savebtn" style="margin:0;padding:.5rem 1.2rem;font-size:.6rem" onclick="loadMessages()">&#8635; Refresh</button>
+        <button class="lob" style="padding:.5rem 1.1rem;font-size:.6rem;border-color:rgba(224,80,80,.4);color:var(--red)" onclick="markAllRead()">&#10003; Mark All Read</button>
+        <span id="msg-count" style="font-size:.65rem;color:var(--muted);margin-left:auto"></span>
+      </div>
+      <div id="msgs-list">
+        <p style="color:var(--muted);font-size:.75rem;text-align:center;padding:2rem">Loading messages...</p>
+      </div>
+    </div>
+    <div class="panel" id="p-cv">
+      <div class="ph">
+        <h2>&#128196; CV Generator</h2>
+        <p>Tomar Firebase-er live data diye ATS-friendly Resume PDF generate koro.</p>
+      </div>
+
+      <div class="ibox" style="margin-bottom:1rem">
+        <h3>&#128161; Kibhabe kaj kore?</h3>
+        <p>
+          Portfolio-te ja kichu data save korecho (Hero, Experience, Skills, Education, Certifications)
+          — sob automatically PDF-e dhukbe.<br>
+          Data change korle shudhu <strong style="color:var(--goldf)">Save</strong> koro, tahole PDF-e notun data ashbe.
+        </p>
+      </div>
+
+      <div class="ibox" style="background:rgba(80,200,120,.04);border-color:rgba(80,200,120,.2);margin-bottom:1.3rem">
+        <h3 style="color:var(--green)">&#9989; ATS Format Checklist</h3>
+        <p>
+          &#10003; Plain text — kono image, table, column nei (ATS parse korte pare)<br>
+          &#10003; Standard section headings (Experience, Education, Skills)<br>
+          &#10003; Contact info clearly at top<br>
+          &#10003; Bullet points for experience<br>
+          &#10003; Single-column layout<br>
+          &#10003; Standard fonts (Helvetica)<br>
+          &#10003; PDF format
+        </p>
+      </div>
+
+      <div class="slbl">&#128203; CV Options</div>
+      <div class="g2" style="margin-bottom:1rem">
+        <div class="mb">
+          <label>Candidate Name (auto-filled from Hero)</label>
+          <input type="text" id="cv-name-preview" placeholder="Loading from Firebase..." readonly style="opacity:.6;cursor:default"/>
+        </div>
+        <div class="mb">
+          <label>Job Title (auto-filled from Hero)</label>
+          <input type="text" id="cv-title-preview" placeholder="Loading from Firebase..." readonly style="opacity:.6;cursor:default"/>
+        </div>
+      </div>
+      <div class="mb">
+        <label>Custom Objective / Summary (optional override)</label>
+        <textarea id="cv-summary" style="min-height:80px;width:100%;padding:.7rem .85rem;background:var(--s2);border:1px solid var(--br);color:var(--text);font-family:Inter,sans-serif;font-size:.86rem;outline:none;resize:vertical;" placeholder="Leave empty to use your About section text from Firebase..."></textarea>
+      </div>
+
+      <div id="cv-data-status" style="padding:.65rem .9rem;font-size:.7rem;color:var(--muted);border:1px solid var(--br);margin-bottom:1rem;background:var(--s2)">
+        &#9203; Data loading...
+      </div>
+
+      <button class="savebtn" onclick="generateAdminCV()" style="background:var(--gold);width:100%;padding:1rem;font-size:.72rem;letter-spacing:.18em">
+        &#11123; Generate &amp; Download ATS Resume PDF
+      </button>
+      <p style="font-size:.62rem;color:var(--muted);margin-top:.6rem;text-align:center">
+        Portfolio-te kono data save koro &#8594; Ekhane ese Download koro. PDF soja ready!
+      </p>
+    </div>
     </div>
   </div>
 </div>
@@ -428,17 +524,28 @@ function addSkill(s){
   var ic=makeInp("sc","Computer Skills",s.category||"");
   var ti=makeTa("si",(s.items||[]).join("\n"));
   cb.appendChild(makeField("mb","Category Name",ic));
-  cb.appendChild(makeField("mb","Skills - protiti alada laine",ti));
+  cb.appendChild(makeField("mb","Skills (protiti alada laine) - e.g: MS Word|90 ba shudhu MS Word",ti));
+  var tipEl=document.createElement("p");
+  tipEl.style.cssText="font-size:.6rem;color:var(--muted);margin-bottom:.6rem;line-height:1.7";
+  tipEl.innerHTML="\u{1F4A1} <b>Progress bar-er jonno:</b> <code style='background:var(--s2);padding:.1rem .3rem'>MS Word|90</code> format-e likho (name|percentage). Shudhu name likhle bar dekhabe na.";
+  cb.appendChild(tipEl);
   card.appendChild(ct);card.appendChild(cb);
   ic.addEventListener("input",function(){title.textContent=this.value||"Notun Skill Category";});
   document.getElementById("sk-box").appendChild(card);
 }
 function getSkills(){
   return Array.from(document.querySelectorAll("#sk-box .card")).map(function(c){
-    return{
-      category:c.querySelector(".sc").value.trim(),
-      items:c.querySelector(".si").value.split("\n").map(function(s){return s.trim();}).filter(Boolean)
-    };
+    var cat=c.querySelector(".sc").value.trim();
+    var rawItems=c.querySelector(".si").value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
+    var items=rawItems.map(function(raw){
+      var parts=raw.split("|");
+      if(parts.length>=2){
+        var lvl=parseInt(parts[1].trim(),10);
+        return{name:parts[0].trim(), level: isNaN(lvl)?0 : Math.min(100,Math.max(0,lvl))};
+      }
+      return raw; // plain string \u2014 no progress bar
+    });
+    return{category:cat, items:items};
   });
 }
 
@@ -520,7 +627,7 @@ document.addEventListener("keydown",function(e){
 </script><script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import{getAuth,signInWithEmailAndPassword,signOut,onAuthStateChanged}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import{getDatabase,ref,set,onValue}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import{getDatabase,ref,set,onValue,push,remove,update}from"https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 const FC={apiKey:"AIzaSyDJfJEDyvpyBs0EGVNBxAsruaOrRQ7Lkmw",authDomain:"onik-portfolio-1d1bd.firebaseapp.com",databaseURL:"https://onik-portfolio-1d1bd-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"onik-portfolio-1d1bd",storageBucket:"onik-portfolio-1d1bd.firebasestorage.app",messagingSenderId:"134396301015",appId:"1:134396301015:web:32e149357af1b3ccb76a92"};
 const CLD={n:"dv0xflicl",p:"portfolio_unsigned"};
 const app=initializeApp(FC),auth=getAuth(app),db=getDatabase(app);
@@ -689,6 +796,339 @@ window.saveAll=async function(){
   await window.saveHero();await window.saveAbout();await window.saveExp();await window.saveSk();await window.saveEdu();await window.saveCert();
   toast("Sob save hoyeche!","s");btn.textContent="Save All to Firebase";btn.disabled=false;
 };
+
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+   CV GENERATOR (Admin Panel)
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
+// Populate preview fields when data loads
+(function waitForData(){
+  var t = setInterval(function(){
+    var nm = document.getElementById("cv-name-preview");
+    var ti = document.getElementById("cv-title-preview");
+    var st = document.getElementById("cv-data-status");
+    if (!nm) return;
+    var heroName  = (document.getElementById("f-name")  && document.getElementById("f-name").value)  || "";
+    var heroTitle = (document.getElementById("f-ti")    && document.getElementById("f-ti").value)     || "";
+    if (heroName) {
+      nm.value = heroName;
+      if (ti) ti.value = heroTitle;
+      if (st) st.innerHTML = "\u2705 Data ready \u2014 " + document.querySelectorAll("#exp-box .card").length + " experience, " + document.querySelectorAll("#sk-box .card").length + " skill groups, " + document.querySelectorAll("#edu-box .card").length + " education, " + document.querySelectorAll("#cert-box .card").length + " certs loaded.";
+      clearInterval(t);
+    }
+  }, 800);
+})();
+
+window.generateAdminCV = function() {
+  if (typeof window.jspdf === 'undefined') {
+    toast("jsPDF load hoyni. Page reload koro.", "e"); return;
+  }
+
+  var nameField  = document.getElementById("f-name");
+  var titleField = document.getElementById("f-ti");
+  var emailField = document.getElementById("f-em");
+  var waField    = document.getElementById("f-wa");
+  var locField   = document.getElementById("f-loc");
+  var linkedinF  = document.getElementById("f-lnk");
+
+  var name    = (nameField    && nameField.value.trim())    || "MD. Ashikur Rahman Onik";
+  var title   = (titleField   && titleField.value.trim())   || "";
+  var email   = (emailField   && emailField.value.trim())   || "";
+  var phone   = (waField      && waField.value.trim())      || "";
+  var loc     = (locField     && locField.value.trim())     || "";
+  var linkedin= (linkedinF    && linkedinF.value.trim())    || "";
+
+  // About summary \u2014 custom override or from Firebase fields
+  var customSummary = (document.getElementById("cv-summary") && document.getElementById("cv-summary").value.trim()) || "";
+  var p1 = (document.getElementById("f-p1") && document.getElementById("f-p1").value.trim()) || "";
+  var p2 = (document.getElementById("f-p2") && document.getElementById("f-p2").value.trim()) || "";
+  var summary = customSummary || (p1 + " " + p2).trim();
+
+  // Collect experience
+  var expCards = document.querySelectorAll("#exp-box .card");
+  var experiences = Array.from(expCards).map(function(card){
+    var role  = (card.querySelector(".er")  && card.querySelector(".er").value.trim())  || "";
+    var org   = (card.querySelector(".eo")  && card.querySelector(".eo").value.trim())  || "";
+    var dfrom = (card.querySelector(".ef")  && card.querySelector(".ef").value.trim())  || "";
+    var dto   = (card.querySelector(".et")  && card.querySelector(".et").value.trim())  || "";
+    var place = (card.querySelector(".ep")  && card.querySelector(".ep").value.trim())  || "";
+    var epTa = card.querySelector(".ep");
+    var points = epTa ? epTa.value.split("\n").map(function(s){return s.trim();}).filter(Boolean) : [];
+    return { role:role, org:org, dateFrom:dfrom, dateTo:dto, location:place, points:points };
+  });
+
+  // Skills
+  var skCards = document.querySelectorAll("#sk-box .card");
+  var skills = Array.from(skCards).map(function(card){
+    var cat   = (card.querySelector(".sc") && card.querySelector(".sc").value.trim()) || "";
+    var rawItems = (card.querySelector(".si") && card.querySelector(".si").value.split("\n").map(function(s){return s.trim();}).filter(Boolean)) || [];
+    var items = rawItems.map(function(raw){ return raw.split("|")[0].trim(); });
+    return { category:cat, items:items };
+  });
+
+  // Education
+  var eduCards = document.querySelectorAll("#edu-box .card");
+  var education = Array.from(eduCards).map(function(card){
+    return {
+      degree:      (card.querySelector(".dd") && card.querySelector(".dd").value.trim()) || "",
+      institution: (card.querySelector(".di") && card.querySelector(".di").value.trim()) || "",
+      year:        (card.querySelector(".dy") && card.querySelector(".dy").value.trim()) || "",
+      gpa:         (card.querySelector(".dg") && card.querySelector(".dg").value.trim()) || "",
+      status:      (card.querySelector(".ds") && card.querySelector(".ds").value.trim()) || ""
+    };
+  });
+
+  // Certifications
+  var certCards = document.querySelectorAll("#cert-box .card");
+  var certifications = Array.from(certCards).map(function(card){
+    return {
+      name:   (card.querySelector(".cn") && card.querySelector(".cn").value.trim()) || "",
+      issuer: (card.querySelector(".cs") && card.querySelector(".cs").value.trim()) || ""
+    };
+  });
+
+  toast("PDF generate hochhe...", "i");
+
+  setTimeout(function(){
+    try {
+      var jsPDF = window.jspdf.jsPDF;
+      var doc = new jsPDF({ unit:"mm", format:"a4", orientation:"portrait" });
+
+      var W=210, H=297, ML=20, MR=20, MT=20;
+      var y=MT, TW=W-ML-MR;
+      var BLACK=[15,12,10], DARK=[40,35,30], GOLD=[150,100,40], GREY=[100,95,88], LGREY=[200,195,188];
+
+      function setFont(style,size,color){ doc.setFont("helvetica",style||"normal"); doc.setFontSize(size||10); doc.setTextColor.apply(doc,color||BLACK); }
+      function hline(x1,x2,yy,col,w){ doc.setDrawColor.apply(doc,col||LGREY); doc.setLineWidth(w||0.3); doc.line(x1,yy,x2,yy); }
+      function checkPage(need){ if(y+(need||12)>H-15){ doc.addPage(); y=MT; } }
+      function wrapText(text,x,maxW,lineH){
+        var lines=doc.splitTextToSize(text,maxW);
+        lines.forEach(function(l){ checkPage(lineH+2); doc.text(l,x,y); y+=lineH; });
+      }
+      function sectionHeading(ttl){
+        checkPage(16); y+=5;
+        setFont("bold",8.5,GOLD); doc.setCharSpace(1.5); doc.text(ttl.toUpperCase(),ML,y); doc.setCharSpace(0);
+        y+=2; hline(ML,W-MR,y,GOLD,0.5); y+=5;
+      }
+
+      // HEADER
+      setFont("bold",22,BLACK); doc.text(name,ML,y); y+=7;
+      setFont("normal",10.5,GOLD); doc.text(title,ML,y); y+=5;
+      hline(ML,W-MR,y,LGREY,0.4); y+=4;
+      setFont("normal",8,GREY);
+      var contactParts=[];
+      if(email) contactParts.push("E: "+email);
+      if(phone) contactParts.push("T: "+phone);
+      if(loc)   contactParts.push(loc);
+      if(linkedin) contactParts.push(linkedin.replace("https://",""));
+      doc.text(contactParts.join("   |   "),ML,y,{maxWidth:TW}); y+=4;
+      hline(ML,W-MR,y,LGREY,0.4); y+=8;
+
+      // SUMMARY
+      if(summary){ sectionHeading("Professional Summary"); setFont("normal",9,DARK); wrapText(summary,ML,TW,5); y+=2; }
+
+      // EXPERIENCE
+      if(experiences.length>0){
+        sectionHeading("Work Experience");
+        experiences.forEach(function(e){
+          checkPage(20);
+          setFont("bold",10,BLACK); doc.text(e.role,ML,y);
+          setFont("normal",8,GREY);
+          var dtStr=[e.dateFrom,e.dateTo].filter(Boolean).join(" \u2013 ")+(e.location?" \u00B7 "+e.location:"");
+          doc.text(dtStr,W-MR-doc.getTextWidth(dtStr),y); y+=4.5;
+          setFont("normal",8.5,GOLD); doc.text(e.org,ML,y); y+=5;
+          setFont("normal",8.5,DARK);
+          (e.points||[]).forEach(function(pt){ checkPage(8); doc.text("\u2022",ML,y); wrapText(pt,ML+5,TW-5,4.8); });
+          y+=3;
+        });
+      }
+
+      // SKILLS
+      if(skills.length>0){
+        sectionHeading("Skills");
+        skills.forEach(function(s){
+          checkPage(10);
+          var rowText=(s.items||[]).join(" \u2022 ");
+          setFont("bold",8.5,BLACK); doc.text((s.category||"")+": ",ML,y);
+          var lw=doc.getTextWidth((s.category||"")+": ");
+          setFont("normal",8.5,DARK);
+          var wrapped=doc.splitTextToSize(rowText,TW-lw);
+          doc.text(wrapped[0]||"",ML+lw,y); y+=4.8;
+          if(wrapped.length>1){ wrapped.slice(1).forEach(function(ln){ checkPage(6); doc.text(ln,ML+lw,y); y+=4.8; }); }
+        });
+        y+=2;
+      }
+
+      // EDUCATION
+      if(education.length>0){
+        sectionHeading("Education");
+        education.forEach(function(e){
+          checkPage(14);
+          setFont("bold",9.5,BLACK); doc.text(e.degree,ML,y);
+          if(e.gpa&&e.gpa!=="\u2014"){ setFont("bold",9.5,GOLD); var gs="GPA: "+e.gpa; doc.text(gs,W-MR-doc.getTextWidth(gs),y); }
+          y+=4.5;
+          setFont("normal",8.5,GREY); doc.text(e.institution+(e.year?" | "+e.year:""),ML,y);
+          if(e.status) doc.text(e.status,W-MR-doc.getTextWidth(e.status),y);
+          y+=6;
+        });
+      }
+
+      // CERTIFICATIONS
+      if(certifications.length>0){
+        sectionHeading("Certifications");
+        certifications.forEach(function(c){
+          checkPage(8);
+          doc.text("\u2022",ML,y);
+          setFont("bold",8.5,BLACK); doc.text(c.name,ML+5,y);
+          if(c.issuer){ setFont("normal",8,GREY); doc.text(" \u2014 "+c.issuer,ML+5+doc.getTextWidth(c.name),y); }
+          setFont("normal",8.5,DARK); y+=5;
+        });
+      }
+
+      // FOOTER
+      var tp=doc.internal.getNumberOfPages();
+      for(var p=1;p<=tp;p++){
+        doc.setPage(p); hline(ML,W-MR,H-12,LGREY,0.3);
+        setFont("normal",7,GREY);
+        doc.text(name+" \u2014 Resume",ML,H-8);
+        doc.text("Page "+p+" of "+tp,W-MR,H-8,{align:"right"});
+      }
+
+      var fname=name.toLowerCase().replace(/[^a-z0-9]+/g,"-")+"-resume.pdf";
+      doc.save(fname);
+      toast("CV download hoyeche!", "s");
+
+    } catch(err) {
+      console.error(err);
+      toast("PDF error: "+err.message, "e");
+    }
+  }, 60);
+};
+
+/* \u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550
+   MESSAGES INBOX
+\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550 */
+
+// Live unread badge on sidebar
+(function watchUnread(){
+  try {
+    onValue(ref(db,'messages'), function(snap){
+      var data = snap.val() || {};
+      var unread = Object.values(data).filter(function(m){ return !m.read; }).length;
+      var badge = document.getElementById('unread-badge');
+      if (badge) {
+        badge.textContent = unread;
+        badge.style.display = unread > 0 ? 'inline' : 'none';
+      }
+    });
+  } catch(e){ console.warn('unread watch:', e); }
+})();
+
+window.loadMessages = function() {
+  var list = document.getElementById('msgs-list');
+  var count = document.getElementById('msg-count');
+  if (!list) return;
+  list.innerHTML = '<p style="color:var(--muted);font-size:.75rem;text-align:center;padding:2rem">Loading\u2026</p>';
+
+  onValue(ref(db,'messages'), function(snap){
+    var data = snap.val();
+    if (!data) {
+      list.innerHTML = '<div class="no-msgs">No messages yet.</div>';
+      if (count) count.textContent = '';
+      return;
+    }
+
+    var entries = Object.entries(data).sort(function(a,b){
+      return new Date(b[1].timestamp||0) - new Date(a[1].timestamp||0);
+    });
+
+    var total  = entries.length;
+    var unread = entries.filter(function(e){ return !e[1].read; }).length;
+    if (count) count.textContent = total + ' message' + (total!==1?'s':'') + (unread?' \u00b7 '+unread+' unread':'');
+
+    var html = '';
+    entries.forEach(function(entry){
+      var key = entry[0];
+      var m   = entry[1];
+      var dt  = m.timestamp ? new Date(m.timestamp).toLocaleString('en-BD',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-';
+      var ch  = m.channel === 'whatsapp' ? 'WhatsApp' : 'Email';
+      var dot = !m.read ? '<span class="msg-dot"></span>' : '';
+      var readBtn = !m.read
+        ? '<button class="msg-btn read-btn" data-key="'+key+'">Read</button>'
+        : '<span style="font-size:.58rem;color:var(--muted)">Read</span>';
+      var delBtn = '<button class="msg-btn del-btn" data-key="'+key+'" data-del="1">X</button>';
+      var emailRow = m.email ? '<div class="msg-email"><a href="mailto:'+m.email+'">'+m.email+'</a></div>' : '';
+
+      html += '<div class="msg-card' + (!m.read?' unread':'') + '" id="mc-'+key+'">';
+      html += '<div class="msg-head">';
+      html += dot;
+      html += '<span class="msg-name">' + (m.name||'-') + '</span>';
+      html += '<span class="msg-ch">' + ch + '</span>';
+      html += '<span class="msg-dt">' + dt + '</span>';
+      html += '<div class="msg-acts">' + readBtn + delBtn + '</div>';
+      html += '</div>';
+      html += '<div class="msg-sub">' + (m.subject||'-') + '</div>';
+      html += '<div class="msg-body">' + (m.message||'').replace(/\n/g,'<br>') + '</div>';
+      html += emailRow;
+      html += '</div>';
+    });
+
+    list.innerHTML = html;
+
+    // Attach events via delegation - no inline onclick needed
+    list.addEventListener('click', function(e){
+      var readEl = e.target.closest('[data-key].read-btn');
+      var delEl  = e.target.closest('[data-del]');
+      if (readEl) { window.markRead(readEl.getAttribute('data-key'), readEl); }
+      if (delEl)  { window.deleteMsg(delEl.getAttribute('data-key')); }
+    }, {once: true});
+
+  }, {onlyOnce:true});
+};
+
+
+window.markRead = function(key, btn) {
+  update(ref(db,'messages/'+key), {read:true}).then(function(){
+    var card = document.getElementById('mc-'+key);
+    if (card) {
+      card.classList.remove('unread');
+      var dot = card.querySelector('.msg-dot');
+      if (dot) dot.remove();
+      if (btn) btn.parentNode.innerHTML = '<span style="font-size:.58rem;color:var(--muted)">\u2713 Read</span>';
+    }
+    toast('Marked as read','s');
+  });
+};
+
+window.markAllRead = function() {
+  onValue(ref(db,'messages'), function(snap){
+    var data = snap.val() || {};
+    var keys = Object.keys(data);
+    if (keys.length === 0) { toast('Kono message nei','i'); return; }
+    Promise.all(keys.map(function(k){
+      return update(ref(db,'messages/'+k), {read:true});
+    })).then(function(){
+      toast('Sob message read hoyeche','s');
+      window.loadMessages();
+    });
+  }, {onlyOnce:true});
+};
+
+window.deleteMsg = function(key) {
+  if (!confirm('Ei message delete korbe?')) return;
+  remove(ref(db,'messages/'+key)).then(function(){
+    var card = document.getElementById('mc-'+key);
+    if (card) { card.style.opacity='0'; card.style.transform='translateX(30px)'; setTimeout(function(){ card.remove(); },300); }
+    toast('Message deleted','s');
+  });
+};
+
+// Auto-load messages when panel is shown
+var _origShowP = window.showP;
+window.showP = function(id, el) {
+  _origShowP(id, el);
+  if (id === 'msgs') window.loadMessages();
+};
+
 </script>
 </body>
 </html>
